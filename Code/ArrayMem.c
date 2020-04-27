@@ -11,6 +11,9 @@
  *
  */
 #include <stdlib.h>
+#include <stdio.h>
+#include <omp.h>
+#include <time.h>
 #include "ArrayMem.h"
 #include "mt19937ar.h"
 
@@ -50,11 +53,23 @@ double *singleArray(int n) {
  * \return double pointer array
  */
 double **fillIn(double **arr, int row, int col, double min, double max) {
-    for (int i = 0; i < row; i++) {
-        for (int j = 0; j < col; j++) {
+    // start the clock
+    clock_t start;
+    start = clock();
+    int j;
+    int i;
+#pragma omp parallel for private(j) num_threads(1)
+    for (i = 0; i < row; i++) {
+        for (j = 0; j < col; j++) {
             arr[i][j] = (max - (min)) * (genrand_real1()) + min;
         }
     }
+    start = (((clock() - start)));
+    //milisec
+//    printf("\nPop Init took: %lf millisecs.\n", ((((double) start) / CLOCKS_PER_SEC) * 1000));
+//    //microsec
+//    printf("\nPop Init took: %lf microsecs.\n", ((((double) start) / CLOCKS_PER_SEC) * 1000000));
+
     return arr;
 }
 
