@@ -22,7 +22,6 @@
 #include <math.h>
 #include <string.h>
 
-
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
 #endif
@@ -94,6 +93,13 @@ void readInput(initData *myData, int NS, int DIM, int iterations, int fitnessCou
         // enemy and food position
         myDA->foodPos = myDA->worstArr[1];
         myDA->enemyPos = myDA->bestArr[1];
+
+        // check if null
+        if (myDA->fVector  == NULL){
+            printf("Memory allocation error.");
+            exit(0);
+        }
+
         // start the algorithm
         startDA(myDA, myData, NS, DIM, iterations, fitnessCounter, DAOut);
 
