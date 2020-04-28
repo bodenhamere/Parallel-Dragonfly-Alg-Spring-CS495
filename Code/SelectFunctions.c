@@ -77,7 +77,7 @@ double *getFun(double *results, double **arr, int row, int col, int counter) {
             }
             break;
         case 8:
-#pragma omp parallel for num_threads(4)
+            #pragma omp parallel for num_threads(4)
             for (int i = 0; i < row; i++) {
                 results[i] = ackley2(arr[i], col);
             }
@@ -138,9 +138,9 @@ double *getFun(double *results, double **arr, int row, int col, int counter) {
     }
         start = (((clock() - start)));
         //milisec
-        printf("\nPop Init took: %lf millisecs.\n", ((((double) start) / CLOCKS_PER_SEC) * 1000));
-        //microsec
-        printf("\nPop Init took: %lf microsecs.\n", ((((double) start) / CLOCKS_PER_SEC) * 1000000));
+//        printf("\nPop Init took: %lf millisecs.\n", ((((double) start) / CLOCKS_PER_SEC) * 1000));
+//        //microsec
+//        printf("\nPop Init took: %lf microsecs.\n", ((((double) start) / CLOCKS_PER_SEC) * 1000000));
 
         return results;
 }

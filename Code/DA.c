@@ -21,6 +21,7 @@
 #include "mt19937ar.h"
 #include <math.h>
 #include <string.h>
+#include <omp.h>
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
@@ -82,7 +83,14 @@ void readInput(initData *myData, int NS, int DIM, int iterations, int fitnessCou
         myData->population = fillIn(myData->population, NS, DIM, myData->min, myData->max);
         myDA->step = fillIn(myDA->step, NS, DIM, myData->min, myData->max);
         myData->fitness = getFun(myData->fitness, myData->population, NS, DIM, myData->functionNumber);
-
+        // start the clock
+//        clock_t start;
+//        start = clock();
+//        start = (((clock() - start)));
+//        //milisec
+//        printf("\nPop Init took: %lf hmmmillisecs.\n", ((((double) start) / CLOCKS_PER_SEC) * 1000));
+//        //microsec
+//        printf("\nPop Init took: %lf microsecs.\n", ((((double) start) / CLOCKS_PER_SEC) * 1000000));
 
         // enemy and food value
         findWorst(myDA->worstArr, myData->fitness, NS);
@@ -250,18 +258,27 @@ void updateWeights(DA *myDA, initData *myData, int iter, int maxIter) {
 void findNeighbors(DA *myDA, initData *myData, int i, int DIM, int NS) {
     int index = 0;
     myDA->numNeighbors = 0;
-
-    for (int k = 0; k < NS; k++) {
+// start the clock
+        clock_t start;
+        start = clock();
+int j;
+int k;
+#pragma omp parallel for private(k,j) num_threads(4)
+    for ( k = 0; k < NS; k++) {
         distance(myDA, myData, i, k, DIM);
         if (lessR(myDA, DIM)) {
             index++;
             myDA->numNeighbors++;
-            for (int j = 0; j < DIM; ++j) {
+            for ( j = 0; j < DIM; ++j) {
                 myDA->neighborsPop[index][j] = myData->population[k][j];
                 myDA->neighborsStep[index][j] = myDA->step[k][j];
             }
         }
     }
+            start = (((clock() - start)));
+        //milisec
+//        printf("\ncalc took: %lf millisecs.\n", ((((double) start) / CLOCKS_PER_SEC) * 1000));
+
 }
 
 /**
@@ -273,9 +290,18 @@ void findNeighbors(DA *myDA, initData *myData, int i, int DIM, int NS) {
  * @param DIM number of dimensions for a data type
  */
 void distance(DA *myDA, initData *myData, int i, int j, int DIM) {
-    for (int k = 0; k < DIM; k++) {
+    // start the clock
+    clock_t start;
+    start = clock();
+    int k;
+//#pragma omp parallel for private(k) num_threads(2)
+    for ( k = 0; k < DIM; k++) {
         myDA->o[k] = sqrt(pow((myData->population[i][k] - myData->population[j][k]), 2));
     }
+    start = (((clock() - start)));
+    //milisec
+//    printf("\ncalc took distance bois: %lf millisecs.\n", ((((double) start) / CLOCKS_PER_SEC) * 1000));
+
 }
 
 /**
@@ -286,6 +312,7 @@ void distance(DA *myDA, initData *myData, int i, int j, int DIM) {
  * @param DIM number of dimensions for a data type
  */
 void separation(DA *myDA, initData *myData, int DIM, int i) {
+
     if (myDA->numNeighbors > 1) {
         for (int j = 0; j < myDA->numNeighbors; ++j) {
             for (int k = 0; k < DIM; ++k) {
@@ -296,6 +323,7 @@ void separation(DA *myDA, initData *myData, int DIM, int i) {
             myDA->sVector[k] = -myDA->sVector[k];
         }
     }
+
 }
 
 /**
@@ -305,6 +333,7 @@ void separation(DA *myDA, initData *myData, int DIM, int i) {
  * @param DIM number of dimensions for a data type
  */
 void alignment(DA *myDA, int DIM, int i) {
+
     if (myDA->numNeighbors > 1) {
         for (int j = 0; j < myDA->numNeighbors; ++j) {
             for (int k = 0; k < DIM; k++) {
@@ -319,6 +348,7 @@ void alignment(DA *myDA, int DIM, int i) {
             myDA->aVector[j] = myDA->step[i][j];
         }
     }
+
 }
 
 /**
@@ -329,6 +359,7 @@ void alignment(DA *myDA, int DIM, int i) {
  * @param DIM number of dimensions for a data type
  */
 void cohesion(DA *myDA, initData *myData, int DIM, int i) {
+
     if (myDA->numNeighbors > 1) {
         for (int j = 0; j < myDA->numNeighbors; ++j) {
             for (int k = 0; k < DIM; k++) {
@@ -346,6 +377,7 @@ void cohesion(DA *myDA, initData *myData, int DIM, int i) {
     for (int j = 0; j < DIM; ++j) {
         myDA->cVector[j] -= myData->population[i][j];
     }
+
 }
 
 /**
@@ -356,12 +388,14 @@ void cohesion(DA *myDA, initData *myData, int DIM, int i) {
  * @param DIM number of dimensions for a data type
  */
 void distraction(DA *myDA, initData *myData, int i, int DIM) {
+
     distance(myDA, myData, i, myDA->enemyPos, DIM);
     if (lessR2(myDA, DIM)) {
         for (int j = 0; j < DIM; ++j) {
             myDA->eVector[j] = myData->population[myDA->enemyPos][j] + myData->population[i][j];
         }
     }
+
 }
 
 /**
@@ -388,6 +422,7 @@ void attraction(DA *myDA, initData *myData, int i, int DIM) {
  * @param DIM number of dimensions for a data type
  */
 void updateStepPosition(DA *myDA, initData *myData, int i, int DIM) {
+
     for (int t = 0; t < DIM; ++t) {
         // velocity matrix
         myDA->step[i][t] = (myDA->s * myDA->sVector[t] + myDA->a * myDA->aVector[t] +
@@ -406,6 +441,7 @@ void updateStepPosition(DA *myDA, initData *myData, int i, int DIM) {
         checkBounds(myData,myData->population[i][t]);
 
     }
+
 }
 
 /**
@@ -416,6 +452,7 @@ void updateStepPosition(DA *myDA, initData *myData, int i, int DIM) {
  * @param DIM number of dimensions for a data type
  */
 void updateStepPosition2(DA *myDA, initData *myData, int i, int DIM) {
+
     for (int t = 0; t < DIM; ++t) {
         // velocity matrix
         myDA->step[i][t] = myDA->w * myDA->step[i][t] + genrand_real1() * myDA->sVector[t] + genrand_real1() * myDA->aVector[t] +
@@ -433,6 +470,7 @@ void updateStepPosition2(DA *myDA, initData *myData, int i, int DIM) {
         checkBounds(myData,myData->population[i][t]);
 
     }
+
 }
 
 /**
@@ -443,6 +481,7 @@ void updateStepPosition2(DA *myDA, initData *myData, int i, int DIM) {
  */
 int lessR(DA *myDA, int DIM) {
     int counter = 0;
+
     for (int i = 0; i < DIM; ++i) {
         if (myDA->o[i] <= myDA->r && myDA->o[i] != 0) {
             counter++;
@@ -496,14 +535,21 @@ int greaterR3(DA *myDA, int DIM) {
  * @param DIM number of dimensions for a data type
  */
 void randomWalk(DA *myDA, initData *myData, int i, int DIM) {
+    // start the clock
+    clock_t start;
+    start = clock();
+#pragma omp parallel for num_threads(4)
     for (int t = 0; t < DIM; ++t) {
         myData->population[i][t] = myData->population[i][t] + levyFlight(DIM) * myData->population[i][t];
         myDA->step[i][t] = 0;
         // if the new position is outside the range of
         // the bounds, then make it equal to the bounds
         checkBounds(myData,myData->population[i][t] );
-
     }
+    start = (((clock() - start)));
+    //milisec
+//    printf("\ncalc took alignment bois: %lf millisecs.\n", ((((double) start) / CLOCKS_PER_SEC) * 1000));
+
 }
 
 /**
@@ -531,5 +577,6 @@ int factorial(int DIM) {
     for (int i = 1; i <= DIM; i++) {
         fact = fact * i;
     }
+
     return DIM;
 }
