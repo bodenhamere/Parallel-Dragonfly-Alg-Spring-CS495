@@ -14,13 +14,23 @@
 #include <time.h>
 #include <stdlib.h>
 #include "mt19937ar.h"
+//#include "src/pcg_variants.h"
 #include "Util.h"
 #include "ArrayMem.h"
 #include "DA.h"
+//#include "src/entropy.h"
+//#include <math.h>
 
 int main() {
     // declare variables
     init_genrand(time(0));
+//    uint64_t seeds[2];
+//    entropy_getbytes((void*)seeds, sizeof(seeds));
+//    pcg32_srandom(seeds[0], seeds[1]);
+//    double d = ldexp(pcg32_random(), -32);
+//        double hmm = pcg32_boundedrand(10);
+//        printf("%lf\n",d);
+
     int NS = 0; //!< number of solutions
     int DIM = 0; //!< number of dimensions
     int iterations = 0; //!< number of iterations
@@ -55,3 +65,5 @@ int main() {
 
     return 0;
 }
+
+//gcc -fopenmp main.c ArrayMem.c DA.c Functions.c mt19937ar.c SelectFunctions.c Util.c -o main

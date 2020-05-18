@@ -16,6 +16,8 @@
 #include <time.h>
 #include "ArrayMem.h"
 #include "mt19937ar.h"
+#include<sys/time.h>
+
 
 /**
  * Generates a double pointer array that has pointer to a single pointer array
@@ -29,6 +31,12 @@ double **createDblArray(int row, int col) {
     for (int i = 0; i < row; i++) {
         matrix[i] = singleArray(col);
     }
+
+    // check if NULL
+    if (matrix  == NULL){
+        printf("Memory allocation error.");
+        exit(0);
+    }
     return matrix;
 }
 
@@ -40,6 +48,12 @@ double **createDblArray(int row, int col) {
  */
 double *singleArray(int n) {
     double *arr = (double *) calloc(n, sizeof(double));
+
+    // check if null
+    if (arr  == NULL){
+        printf("Memory allocation error.");
+        exit(0);
+    }
     return arr;
 }
 
@@ -53,22 +67,13 @@ double *singleArray(int n) {
  * \return double pointer array
  */
 double **fillIn(double **arr, int row, int col, double min, double max) {
-    // start the clock
-    clock_t start;
-    start = clock();
-    int j;
-    int i;
-#pragma omp parallel for private(j) num_threads(1)
+    int j, i;
+    #pragma omp parallel for private(j) num_threads(1)
     for (i = 0; i < row; i++) {
         for (j = 0; j < col; j++) {
             arr[i][j] = (max - (min)) * (genrand_real1()) + min;
         }
     }
-    start = (((clock() - start)));
-    //milisec
-//    printf("\nPop Init took: %lf millisecs.\n", ((((double) start) / CLOCKS_PER_SEC) * 1000));
-//    //microsec
-//    printf("\nPop Init took: %lf microsecs.\n", ((((double) start) / CLOCKS_PER_SEC) * 1000000));
 
     return arr;
 }

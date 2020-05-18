@@ -47,6 +47,7 @@ double schwefel(double *array, int n) {
 double deJong(double *array, int n) {
     double sum = 0.0;
 
+//#pragma omp parallel for reduction(+:sum)
     for(int i = 0; i < n; i++) {
         sum += pow(array[i], 2);
     }
