@@ -18,7 +18,6 @@
 #include "mt19937ar.h"
 #include<sys/time.h>
 
-
 /**
  * Generates a double pointer array that has pointer to a single pointer array
  * The arrays are initialized to 0 by using calloc()
@@ -74,7 +73,6 @@ double **fillIn(double **arr, int row, int col, double min, double max) {
             arr[i][j] = (max - (min)) * (genrand_real1()) + min;
         }
     }
-
     return arr;
 }
 

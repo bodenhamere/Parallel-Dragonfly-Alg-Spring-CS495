@@ -54,7 +54,6 @@ void readInput(initData *myData, int NS, int DIM, int iterations, int fitnessCou
         printf("Error opening Functions.txt file, make sure the file is in the cmake-build-debug folder\n");
         exit(1);
     }
-
     // get the data from the files
     while (!feof(funFile)) {
         // read values and save them to the data struct
@@ -262,7 +261,7 @@ void findNeighbors(DA *myDA, initData *myData, int i, int DIM, int NS) {
                     myDA->neighborsPop[index][j+3] = myData->population[k][j+3];
                     myDA->neighborsStep[index][j+3] = myDA->step[k][j+3];
                 }
-                for (; j < DIM; ++j) {
+                for (; j < DIM; j++) {
                     myDA->neighborsPop[index][j] = myData->population[k][j];
                     myDA->neighborsStep[index][j] = myDA->step[k][j];
                 }
@@ -559,6 +558,5 @@ int factorial(int DIM) {
     for (int i = 1; i <= DIM; i++) {
         fact = fact * i;
     }
-
     return DIM;
 }
