@@ -151,7 +151,7 @@ void startDA(DA *myDA, initData *myData, int NS, int DIM, int iterations, int fi
             attraction(myDA, myData, i, DIM);
 
             //update velocity and position vectors
-            if (greaterR3(myDA, DIM)){
+            if (greaterR3(myDA, DIM)) {
                 if (myDA->numNeighbors > 1) {
                     updateStepPosition2(myDA, myData, i, DIM);
                 } else {
@@ -179,15 +179,15 @@ void startDA(DA *myDA, initData *myData, int NS, int DIM, int iterations, int fi
             }
 
             for (int j = 0; j < NS; ++j) {
-                memset(myDA->neighborsStep[j],0, sizeof(double));
-                memset(myDA->neighborsPop[j],0, sizeof(double));
+                memset(myDA->neighborsStep[j], 0, sizeof(double));
+                memset(myDA->neighborsPop[j], 0, sizeof(double));
             }
-            memset(myDA->sVector,0, sizeof(double));
-            memset(myDA->aVector,0, sizeof(double));
-            memset(myDA->cVector,0, sizeof(double));
-            memset(myDA->fVector,0, sizeof(double));
-            memset(myDA->eVector,0, sizeof(double));
-            memset(myDA->o,0, sizeof(double));
+            memset(myDA->sVector, 0, sizeof(double));
+            memset(myDA->aVector, 0, sizeof(double));
+            memset(myDA->cVector, 0, sizeof(double));
+            memset(myDA->fVector, 0, sizeof(double));
+            memset(myDA->eVector, 0, sizeof(double));
+            memset(myDA->o, 0, sizeof(double));
 
         }
         printf("(%d)Best: ", t);
@@ -244,29 +244,30 @@ void updateWeights(DA *myDA, initData *myData, int iter, int maxIter) {
 void findNeighbors(DA *myDA, initData *myData, int i, int DIM, int NS) {
     int index = 0;
     myDA->numNeighbors = 0;
-        int j, k;
+    int j, k;
+
 #pragma omp parallel for private(k, j) num_threads(4)
-        for (k = 0; k < NS; k++) {
-            distance(myDA, myData, i, k, DIM);
-            if (lessR(myDA, DIM)) {
-                index++;
-                myDA->numNeighbors++;
-                for (j = 0; j < DIM; j+=4) {
-                    myDA->neighborsPop[index][j] = myData->population[k][j];
-                    myDA->neighborsStep[index][j] = myDA->step[k][j];
-                    myDA->neighborsPop[index][j+1] = myData->population[k][j+1];
-                    myDA->neighborsStep[index][j+1] = myDA->step[k][j+1];
-                    myDA->neighborsPop[index][j+2] = myData->population[k][j+2];
-                    myDA->neighborsStep[index][j+2] = myDA->step[k][j+2];
-                    myDA->neighborsPop[index][j+3] = myData->population[k][j+3];
-                    myDA->neighborsStep[index][j+3] = myDA->step[k][j+3];
-                }
-                for (; j < DIM; j++) {
-                    myDA->neighborsPop[index][j] = myData->population[k][j];
-                    myDA->neighborsStep[index][j] = myDA->step[k][j];
-                }
+    for (k = 0; k < NS; k++) {
+        distance(myDA, myData, i, k, DIM);
+        if (lessR(myDA, DIM)) {
+            index++;
+            myDA->numNeighbors++;
+            for (j = 0; j < DIM; j++) {
+                myDA->neighborsPop[index][j] = myData->population[k][j];
+                myDA->neighborsStep[index][j] = myDA->step[k][j];
+                myDA->neighborsPop[index][j + 1] = myData->population[k][j + 1];
+                myDA->neighborsStep[index][j + 1] = myDA->step[k][j + 1];
+                myDA->neighborsPop[index][j + 2] = myData->population[k][j + 2];
+                myDA->neighborsStep[index][j + 2] = myDA->step[k][j + 2];
+                myDA->neighborsPop[index][j + 3] = myData->population[k][j + 3];
+                myDA->neighborsStep[index][j + 3] = myDA->step[k][j + 3];
+            }
+            for (; j < DIM; j++) {
+                myDA->neighborsPop[index][j] = myData->population[k][j];
+                myDA->neighborsStep[index][j] = myDA->step[k][j];
             }
         }
+    }
 }
 
 /**
@@ -396,8 +397,8 @@ void updateStepPosition(DA *myDA, initData *myData, int i, int DIM) {
     for (int t = 0; t < DIM; ++t) {
         // velocity matrix
         myDA->step[i][t] = (myDA->s * myDA->sVector[t] + myDA->a * myDA->aVector[t] +
-                                myDA->c * myDA->cVector[t] + myDA->f * myDA->fVector[t] +
-                                myDA->e * myDA->eVector[t]) + myDA->w * myDA->step[i][t];
+                            myDA->c * myDA->cVector[t] + myDA->f * myDA->fVector[t] +
+                            myDA->e * myDA->eVector[t]) + myDA->w * myDA->step[i][t];
 
         // if the new position is outside the range of
         // the bounds, then make it equal to the bounds
@@ -408,7 +409,7 @@ void updateStepPosition(DA *myDA, initData *myData, int i, int DIM) {
 
         // if the new population is outside the range of
         // the bounds, then make it equal to the bounds
-        checkBounds(myData,myData->population[i][t]);
+        checkBounds(myData, myData->population[i][t]);
     }
 }
 
@@ -422,8 +423,9 @@ void updateStepPosition(DA *myDA, initData *myData, int i, int DIM) {
 void updateStepPosition2(DA *myDA, initData *myData, int i, int DIM) {
     for (int t = 0; t < DIM; ++t) {
         // velocity matrix
-        myDA->step[i][t] = myDA->w * myDA->step[i][t] + genrand_real1() * myDA->sVector[t] + genrand_real1() * myDA->aVector[t] +
-                            genrand_real1() * myDA->cVector[t];
+        myDA->step[i][t] =
+                myDA->w * myDA->step[i][t] + genrand_real1() * myDA->sVector[t] + genrand_real1() * myDA->aVector[t] +
+                genrand_real1() * myDA->cVector[t];
 
         // if the new position is outside the range of
         // the bounds, then make it equal to the bounds
@@ -434,7 +436,7 @@ void updateStepPosition2(DA *myDA, initData *myData, int i, int DIM) {
 
         // if the new population is outside the range of
         // the bounds, then make it equal to the bounds
-        checkBounds(myData,myData->population[i][t]);
+        checkBounds(myData, myData->population[i][t]);
     }
 }
 
@@ -452,7 +454,7 @@ int lessR(DA *myDA, int DIM) {
             counter++;
         }
     }
-    if (counter == DIM-1) {
+    if (counter == DIM - 1) {
         return 1;
     }
     return 0;
@@ -471,7 +473,7 @@ int lessR2(DA *myDA, int DIM) {
             counter++;
         }
     }
-    if (counter == DIM-1) {
+    if (counter == DIM - 1) {
         return 1;
     }
     return 0;
@@ -501,35 +503,13 @@ int greaterR3(DA *myDA, int DIM) {
  */
 void randomWalk(DA *myDA, initData *myData, int i, int DIM) {
     int t;
-    #pragma omp parallel for num_threads(4)
-        for ( t = 0; t < DIM; t+=4) {
+#pragma omp parallel for num_threads(4)
+    for (t = 0; t < DIM; t++) {
         myData->population[i][t] = myData->population[i][t] + levyFlight(DIM) * myData->population[i][t];
         myDA->step[i][t] = 0;
         // if the new position is outside the range of
         // the bounds, then make it equal to the bounds
-        checkBounds(myData,myData->population[i][t]);
-            myData->population[i][t+1] = myData->population[i][t+1] + levyFlight(DIM) * myData->population[i][t+1];
-            myDA->step[i][t+1] = 0;
-            // if the new position is outside the range of
-            // the bounds, then make it equal to the bounds
-            checkBounds(myData,myData->population[i][t+1]);
-            myData->population[i][t+2] = myData->population[i][t+2] + levyFlight(DIM) * myData->population[i][t+2];
-            myDA->step[i][t+2] = 0;
-            // if the new position is outside the range of
-            // the bounds, then make it equal to the bounds
-            checkBounds(myData,myData->population[i][t+2]);
-            myData->population[i][t+3] = myData->population[i][t+3] + levyFlight(DIM) * myData->population[i][t+3];
-            myDA->step[i][t+3] = 0;
-            // if the new position is outside the range of
-            // the bounds, then make it equal to the bounds
-            checkBounds(myData,myData->population[i][t+3]);
-    }
-        for (; t < DIM; t++) {
-        myData->population[i][t] = myData->population[i][t] + levyFlight(DIM) * myData->population[i][t];
-        myDA->step[i][t] = 0;
-        // if the new position is outside the range of
-        // the bounds, then make it equal to the bounds
-        checkBounds(myData,myData->population[i][t] );
+        checkBounds(myData, myData->population[i][t]);
     }
 }
 
